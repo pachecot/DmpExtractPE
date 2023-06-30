@@ -1,0 +1,34 @@
+Numeric loopGains[12]
+Datetime lasttime
+
+Init:
+
+  loopGains[1] = 0.02
+  loopGains[2] = 0.001
+  loopGains[3] = loopGains[2] / 4
+  loopGains[10] = 5
+
+  Goto Shutdown
+
+Shutdown:
+
+  If CCTempLoopEn then Goto PIDSetup
+  CCTempLoop = 0
+
+PIDSetup:
+
+  loopGains[11] = CCTempLoop
+  PIDLoop10(0, CCTemp, CCTempSpt, loopGains, lasttime, 0)
+
+  Goto Modulating
+
+Modulating:
+
+  If TD > 0 then Goto Init
+  If not CCTempLoopEn then Goto Shutdown
+
+  If abs(Date - lasttime) >= loopGains[10] then
+    CCTempLoop = PIDLoop10(1, CCTemp, CCTempSpt, loopGains, lasttime, 0)
+  Endif
+
+

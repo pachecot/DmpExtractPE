@@ -1,0 +1,44 @@
+Numeric loopGains[12]
+Datetime lasttime
+
+Init:
+
+  loopGains[1] = 0.005
+  loopGains[2] = 0.00025
+  loopGains[3] = 0 'loopGains[2] / 4
+  loopGains[9] = 5%
+  loopGains[10] = 5
+
+  Goto Shutdown
+
+Shutdown:
+
+  If MixTempLoopEn then Goto PIDSetup
+
+  MixTempLoop = 0
+
+PIDSetup:
+
+  loopGains[11] = MixTempLoop
+  PIDLoop10(0, MixTemp, MixTempSpt, loopGains, lasttime, 0)
+
+  Goto Modulating
+
+Modulating:
+
+  If TD > 0 then Goto Init
+  If not MixTempLoopEn then Goto Shutdown
+  If CCTempLoop > 4% and MixTempLoop = 100% then Goto Holding
+
+  If abs(Date - lasttime) >= loopGains[10] then
+    MixTempLoop = PIDLoop10(1, MixTemp, MixTempSpt, loopGains, lasttime, 0)
+  Endif
+
+Holding:
+
+  If not MixTempLoopEn then Goto Shutdown
+  If CCTempLoop < 2% then Goto PIDSetup
+
+  MixTempLoop = 100%
+
+

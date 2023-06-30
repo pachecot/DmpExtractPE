@@ -1,0 +1,12 @@
+
+
+
+Shutdown:
+
+  If Occupied and (not ShutdownAlm) and (not SystemDisable) then Goto RunFans
+  SupFanSStg = 0
+
+RunFans:
+
+  If (not Occupied) or ShutdownAlm or SystemDisable then Goto Shutdown
+  SupFanSStg = 100%

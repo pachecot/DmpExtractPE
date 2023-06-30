@@ -1,0 +1,10 @@
+Decide:
+
+  If FreezeReset then Goto ResetDelay
+
+ResetDelay:
+
+  If TS < 30 then Goto ResetDelay
+
+  FreezeReset = Off
+  Goto Decide

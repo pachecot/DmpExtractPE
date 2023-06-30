@@ -1,0 +1,21 @@
+FreezeProtect:
+
+  If not FreezeStatAlm then Goto Shutdown
+
+  ExhDamper = 0%
+
+Shutdown:
+
+  If FreezeStatAlm then Goto FreezeProtect
+  If FanStatus then Goto Modulating
+
+  ExhDamper = 0%
+
+Modulating:
+
+  If FreezeStatAlm then Goto FreezeProtect
+  If not FanStatus then Goto Shutdown
+
+  ExhDamper = ExhStaticLoop
+
+

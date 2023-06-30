@@ -1,0 +1,49 @@
+'20151116 TJ PIDLoop10
+' - replaced bias Pidvar[0] with Pidvar[11]
+' - Pidvar[12] = top of scale (1, 100)
+
+Arg 1 Actn
+Arg 2 Cv
+Arg 3 Sp
+Arg 4 Pidvar
+Arg 5 Lasttime
+Arg 6 Arg6 'deadband
+
+Numeric err, x, op, deadband, scaletop
+
+scaletop = maximum(1, Pidvar[12]) 'default=1
+
+If passed(6) then deadband = Arg6 Else deadband = 0
+
+If Actn = 0 then
+  Pidvar[5] = 0
+  Pidvar[7] = 0
+  Lasttime = Date
+  Pidvar[11] = Pidvar[11] / scaletop
+  Return Pidvar[11] * scaletop
+Endif
+
+If Actn = 3 or Actn = 4 then
+  Pidvar[1] = LinearReset4(0, Cv * Pidvar[9], Pidvar[8] * 10%, Pidvar[8], abs(Cv - Sp))
+  Pidvar[2] = Pidvar[1] / 100
+  Pidvar[3] = Pidvar[1] / 166.67
+Endif
+
+If Actn = 1 or Actn = 3 then err = Cv - Sp
+If Actn = 2 or Actn = 4 then err = Sp - Cv
+
+If abs(Cv - Sp) > deadband and abs(Date - Lasttime) < 2 * Pidvar[10] and Date > Lasttime then
+  x = (Pidvar[1] * err) + (Pidvar[3] * (err - Pidvar[7]) / (Date - Lasttime)) + Pidvar[11]
+  Pidvar[4] = Pidvar[1] * err
+  Pidvar[5] = maximum(minimum(Pidvar[5] + (Pidvar[2] * err * (Date - Lasttime)), 1 - x), -x)
+  Pidvar[6] = Pidvar[3] * (err - Pidvar[7]) / (Date - Lasttime)
+Endif
+
+op = maximum(minimum((Pidvar[11] + Pidvar[4] + Pidvar[5] + Pidvar[6]) * scaletop, scaletop), 0)
+Pidvar[7] = err
+Lasttime = Date
+Return op
+
+
+
+

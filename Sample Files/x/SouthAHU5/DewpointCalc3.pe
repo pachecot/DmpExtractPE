@@ -1,0 +1,75 @@
+' This function calculates the dewpoint temp, given the drybulb temp and the 
+
+' percent RH. It is a trial-and-error loop, which returns the dewpoint temp 
+
+' after 5 loops through the function or within 0.05� tolerance.
+
+'
+
+' v2 - prevent divide by zero error - TJC 20110728
+
+' v3 - simplify algebra & exit early - TPP 20170203
+
+'
+
+
+
+Arg 1 temp ' temperature in �F
+
+Arg 2 rh ' rh
+
+Arg 3 oldvalue ' last dp value
+
+
+
+Numeric x, y, z, count, dewpoint, lastDp, rhf
+
+
+
+dewpoint = oldvalue
+
+
+
+x = 273.16 / ((temp - 32) / 1.8 + 273.16)
+
+x = -10.7959 * (1 - x) - (2.1836 * ln(x)) + 2.2196
+
+
+
+If rh > 1 then rhf = rh / 100 Else rhf = rh
+
+
+
+count = 0
+
+
+
+Repeat
+
+
+
+  count = count + 1
+
+  lastDp = dewpoint
+
+
+
+  y = 273.16 / ((lastDp - 32) / 1.8 + 273.16)
+
+  y = -10.7959 * (1 - y) - (2.1836 * ln(y)) + 2.2196
+
+
+
+  z = exp(2.3026 * (x - y))
+
+  dewpoint = lastDp + (rhf - z) * 50
+
+
+
+Until (count > 4) or (abs(dewpoint - lastDp) < 0.05)
+
+
+
+Return dewpoint
+
+

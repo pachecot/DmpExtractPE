@@ -1,0 +1,1267 @@
+' Date : 04/06/18 06:44:08 AM
+' User : Root\Acc
+' Version :  2.0.0.20140808
+
+Continuum
+Network
+
+Path : MtAuburnHospital\Proj6552.Ahu5
+
+Dictionary : 
+
+'TYPE                   : DEVICE                       : NAME                   : TEMPLATE : ALIAS
+ InfinityProgram        : MtAuburnHospital\Proj6552.Ahu5 : DehumidSptCtl          : False    : DehumidSptCtl
+ InfinityProgram        : MtAuburnHospital\Proj6552.Ahu5 : HumidSptCtl            : False    : HumidSptCtl
+ InfinityProgram        : MtAuburnHospital\Proj6552.Ahu5 : MixTempSptCtl          : False    : MixTempSptCtl
+ InfinityProgram        : MtAuburnHospital\Proj6552.Ahu5 : CCTempSptCtl           : False    : CCTempSptCtl
+ InfinityProgram        : MtAuburnHospital\Proj6552.Ahu5 : RetFansEcmCtl          : False    : RetFansEcmCtl
+ InfinityProgram        : MtAuburnHospital\Proj6552.Ahu5 : MinOaDamperCtl         : False    : MinOaDamperCtl
+ InfinityProgram        : MtAuburnHospital\Proj6552.Ahu5 : SupTempLoopCtl         : False    : SupTempLoopCtl
+ InfinityProgram        : MtAuburnHospital\Proj6552.Ahu5 : SupStaticLoopCtl       : False    : SupStaticLoopCtl
+ InfinityProgram        : MtAuburnHospital\Proj6552.Ahu5 : SupFansStgCtl          : False    : SupFansStgCtl
+ InfinityProgram        : MtAuburnHospital\Proj6552.Ahu5 : SupSmkDampersCtl       : False    : SupSmkDampersCtl
+ InfinityProgram        : MtAuburnHospital\Proj6552.Ahu5 : SupFansEcmCtl          : False    : SupFansEcmCtl
+ InfinityProgram        : MtAuburnHospital\Proj6552.Ahu5 : StmValveCtl            : False    : StmValveCtl
+ InfinityProgram        : MtAuburnHospital\Proj6552.Ahu5 : RetStaticLoopCtl       : False    : RetStaticLoopCtl
+ InfinityProgram        : MtAuburnHospital\Proj6552.Ahu5 : RetFanStgCtl           : False    : RetFanStgCtl
+ InfinityProgram        : MtAuburnHospital\Proj6552.Ahu5 : RetSmkDampersCtl       : False    : RetSmkDampersCtl
+ InfinityProgram        : MtAuburnHospital\Proj6552.Ahu5 : MixTempLoopCtl         : False    : MixTempLoopCtl
+ InfinityProgram        : MtAuburnHospital\Proj6552.Ahu5 : MixTempLLLoopCtl       : False    : MixTempLLLoopCtl
+ InfinityProgram        : MtAuburnHospital\Proj6552.Ahu5 : HumidValveCtl          : False    : HumidValveCtl
+ InfinityProgram        : MtAuburnHospital\Proj6552.Ahu5 : HumidLoopCtl           : False    : HumidLoopCtl
+ InfinityProgram        : MtAuburnHospital\Proj6552.Ahu5 : ExhStaticLoopCtl       : False    : ExhStaticLoopCtl
+ InfinityProgram        : MtAuburnHospital\Proj6552.Ahu5 : ExhDamperCtl           : False    : ExhDamperCtl
+ InfinityProgram        : MtAuburnHospital\Proj6552.Ahu5 : DemandVentResetCtl     : False    : DemandVentResetC
+ InfinityProgram        : MtAuburnHospital\Proj6552.Ahu5 : DehumidLoopCtl         : False    : DehumidLoopCtl
+ InfinityProgram        : MtAuburnHospital\Proj6552.Ahu5 : DamperCtl              : False    : DamperCtl
+ InfinityProgram        : MtAuburnHospital\Proj6552.Ahu5 : ChwValveCtl            : False    : ChwValveCtl
+ InfinityProgram        : MtAuburnHospital\Proj6552.Ahu5 : CCTempLoopCtl          : False    : CCTempLoopCtl
+ InfinityProgram        : MtAuburnHospital\Proj6552.Ahu5 : MiscVariable           : False    : MiscVariable
+EndDictionary
+
+Object : DehumidSptCtl
+ Type : InfinityProgram
+ LastChange : 4/6/2018 6:26:49 AM
+ DeviceId : MtAuburnHospital\Proj6552.Ahu5
+ Alias : DehumidSptCtl
+ CreateTime : 4/6/2018 6:23:37 AM
+ CreatedBy : Root\Acc
+ TimeLocked : 4/6/2018 6:26:49 AM
+ InstanceId : 7050/7248
+ ByteCode : 
+Numeric tsUP
+Numeric tsDN
+
+Shutdown:
+
+  If FanStatus and DehumidEnable then Goto Init
+
+  DehumidSpt = RetDewpointSptHi
+
+Init:
+
+  DehumidSpt = RetDewpointSptLo
+  Goto Decide
+
+Decide:
+
+  If not (FanStatus and DehumidEnable) then Goto Shutdown
+
+  If RetDewpoint > RetDewpointSptHi + 0.5 then tsDN = tsDN + Scan Else tsDN = 0
+  If RetDewpoint < RetDewpointSptHi - 0.5 then tsUP = tsUP + Scan Else tsUP = 0
+
+  If tsDN > 240 then Goto ResetDN
+  If tsUP > 240 then Goto ResetUP
+
+ResetUP:
+
+  DehumidSpt = minimum(DehumidSpt + 0.5, SupDewpointHL, SupTempSpt + 2)
+  tsUP = 0
+  Goto Decide
+
+ResetDN:
+
+  DehumidSpt = maximum(DehumidSpt - 0.5, RetDewpointSptLo, 48)
+  tsDN = 0
+  Goto Decide
+
+ EndByteCode
+ DefaultPort : comm3
+EndObject
+
+Object : HumidSptCtl
+ Type : InfinityProgram
+ LastChange : 4/5/2018 3:23:42 PM
+ DeviceId : MtAuburnHospital\Proj6552.Ahu5
+ Alias : HumidSptCtl
+ CreateTime : 4/5/2018 3:14:10 PM
+ CreatedBy : Root\Acc
+ TimeLocked : 4/5/2018 3:23:42 PM
+ InstanceId : 7050/7247
+ ByteCode : 
+Numeric tsUP
+Numeric tsDN
+
+Shutdown:
+
+  If FanStatus and HumidEnable then Goto Init
+
+  HumidSpt = RetDewpointSptLo
+
+Init:
+
+  HumidSpt = SupDewpointHL
+  Goto Decide
+
+Decide:
+
+  If not (FanStatus and HumidEnable) then Goto Shutdown
+
+  If RetDewpoint > RetDewpointSptLo + 0.5 then tsDN = tsDN + Scan Else tsDN = 0
+  If RetDewpoint < RetDewpointSptLo - 0.5 then tsUP = tsUP + Scan Else tsUP = 0
+
+  If tsDN > 240 then Goto ResetDN
+  If tsUP > 240 then Goto ResetUP
+
+ResetUP:
+
+  HumidSpt = minimum(HumidSpt + 0.5, SupDewpointHL)
+  tsUP = 0
+  Goto Decide
+
+ResetDN:
+
+  HumidSpt = maximum(HumidSpt - 0.5, RetDewpointSptLo)
+  tsDN = 0
+  Goto Decide
+
+ EndByteCode
+ DefaultPort : comm3
+EndObject
+
+Object : MixTempSptCtl
+ Type : InfinityProgram
+ LastChange : 4/5/2018 2:01:37 PM
+ DeviceId : MtAuburnHospital\Proj6552.Ahu5
+ Alias : MixTempSptCtl
+ CreateTime : 4/5/2018 1:58:26 PM
+ CreatedBy : Root\Acc
+ TimeLocked : 4/6/2018 6:42:19 AM
+ InstanceId : 7050/7240
+ ByteCode : 
+Numeric tsUP
+Numeric tsDN
+
+Shutdown:
+
+  If MixTempLoopEn then Goto Decide
+
+  MixTempSpt = SupTempSpt - 5
+
+Decide:
+
+  If SupTemp > SupTempSpt + 1 then tsDN = tsDN + Scan Else tsDN = 0
+  If SupTemp < SupTempSpt - 1 then tsUP = tsUP + Scan Else tsUP = 0
+
+  If tsDN > 240 and MixTempLoop < 100% then Goto ResetDN
+  If tsUP > 240 then Goto ResetUP
+
+ResetUP:
+
+  MixTempSpt = minimum(MixTempSpt + 0.5, SupTempSpt + 2)
+  tsUP = 0
+  Goto Decide
+
+ResetDN:
+
+  MixTempSpt = maximum(MixTempSpt - 0.5, SupTempSpt - 10)
+  tsDN = 0
+  Goto Decide
+
+ EndByteCode
+ DefaultPort : comm3
+EndObject
+
+Object : CCTempSptCtl
+ Type : InfinityProgram
+ LastChange : 4/5/2018 2:04:59 PM
+ DeviceId : MtAuburnHospital\Proj6552.Ahu5
+ Alias : CCTempSptCtl
+ CreateTime : 4/5/2018 1:45:48 PM
+ CreatedBy : Root\Acc
+ TimeLocked : 4/6/2018 6:43:33 AM
+ InstanceId : 7050/7239
+ ByteCode : 
+Numeric tsUP
+Numeric tsDN
+
+Shutdown:
+
+  If CCTempLoopEn then Goto Decide
+
+  CCTempSpt = SupTempSpt - 5
+
+Decide:
+
+  If SupTemp > SupTempSpt + 1 then tsDN = tsDN + Scan Else tsDN = 0
+  If SupTemp < SupTempSpt - 1 then tsUP = tsUP + Scan Else tsUP = 0
+
+  If tsDN > 240 then Goto ResetDN
+  If tsUP > 240 then Goto ResetUP
+
+ResetUP:
+
+  CCTempSpt = minimum(CCTempSpt + 0.5, SupTempSpt + 2)
+  tsUP = 0
+  Goto Decide
+
+ResetDN:
+
+  CCTempSpt = maximum(CCTempSpt - 0.5, SupTempSpt - 10)
+  tsDN = 0
+  Goto Decide
+
+ EndByteCode
+ DefaultPort : comm3
+EndObject
+
+Object : RetFansEcmCtl
+ Type : InfinityProgram
+ LastChange : 4/5/2018 12:20:03 PM
+ DeviceId : MtAuburnHospital\Proj6552.Ahu5
+ Alias : RetFansEcmCtl
+ CreateTime : 4/5/2018 12:14:43 PM
+ CreatedBy : Root\Acc
+ TimeLocked : 4/6/2018 6:42:14 AM
+ InstanceId : 7050/7238
+ ByteCode : 
+Numeric rate
+Numeric RetFanEcm
+
+Init:
+
+  rate = 100% / 120
+  Goto Shutdown
+
+Shutdown:
+
+  If RetFanStg > 0 then Goto Startup
+  RetFan1.2Ecm = 0
+  RetFan3.4Ecm = 0
+  RetFan5Ecm = 0
+
+Startup:
+
+  If RetFanStg < 1 then Goto Shutdown
+  If FanStatus and SupSDEsOpen then Goto Rampup
+
+  RetFan1.2Ecm = RetFanEcmMin
+  RetFan3.4Ecm = RetFanEcmMin
+  RetFan5Ecm = RetFanEcmMin
+
+Rampup:
+
+  If RetFanStg < 1 then Goto Shutdown
+  If SupSDEsOpen then Goto Startup
+  If RetFanEcm >= RetStaticLoop then Goto Tracking
+
+  RetFanEcm = minimum(100%, maximum(RetFanEcmMin, RetFanEcm + rate * Scan))
+
+  RetFan1.2Ecm = RetFanEcm
+  RetFan3.4Ecm = RetFanEcm
+  RetFan5Ecm = RetFanEcm
+
+Tracking:
+
+  If RetFanStg < 1 then Goto Shutdown
+  If SupSDEsOpen then Goto Startup
+
+  RetFanEcm = maximum(RetFanEcmMin, RetStaticLoop)
+
+  RetFan1.2Ecm = RetFanEcm
+  RetFan3.4Ecm = RetFanEcm
+  RetFan5Ecm = RetFanEcm
+
+
+ EndByteCode
+ DefaultPort : comm3
+EndObject
+
+Object : MinOaDamperCtl
+ Type : InfinityProgram
+ LastChange : 4/5/2018 12:02:00 PM
+ DeviceId : MtAuburnHospital\Proj6552.Ahu5
+ Alias : MinOaDamperCtl
+ CreateTime : 4/5/2018 12:02:00 PM
+ CreatedBy : Root\Acc
+ TimeLocked : 4/6/2018 6:42:36 AM
+ InstanceId : 7050/7235
+ ByteCode : 
+CloseDamper:
+
+  If FanStatus then Goto OpenDamper_Init
+  MinOaDamper = Off
+
+OpenDamper_Init:
+
+  If TS > 60 then Goto OpenDamper
+  If not (FanStatus) then Goto CloseDamper
+
+OpenDamper:
+
+  If not (FanStatus) then Goto CloseDamper
+  MinOaDamper = On
+
+ EndByteCode
+ DefaultPort : comm3
+EndObject
+
+Object : SupTempLoopCtl
+ Type : InfinityProgram
+ LastChange : 4/5/2018 2:04:04 PM
+ DeviceId : MtAuburnHospital\Proj6552.Ahu5
+ Alias : SupTempLoopCtl
+ CreateTime : 4/5/2018 12:01:42 PM
+ CreatedBy : Root\Acc
+ TimeLocked : 4/6/2018 6:41:15 AM
+ InstanceId : 7050/7234
+ ByteCode : 
+Numeric loopGains[12]
+Datetime lasttime
+
+Init:
+
+  loopGains[1] = 0.02
+  loopGains[2] = 0.001
+  loopGains[3] = loopGains[2] / 4
+  loopGains[10] = 5
+
+  Goto Shutdown
+
+Shutdown:
+
+  If SupTempLoopEn then Goto PIDSetup
+  SupTempLoop = 0
+
+PIDSetup:
+
+  loopGains[11] = SupTempLoop
+  PIDLoop10(0, SupTemp, SupTempSpt, loopGains, lasttime, 0)
+
+  Goto Modulating
+
+Modulating:
+
+  If TD > 0 then Goto Init
+  If not SupTempLoopEn then Goto Shutdown
+
+  If abs(Date - lasttime) >= loopGains[10] then
+    SupTempLoop = PIDLoop10(2, SupTemp, SupTempSpt, loopGains, lasttime, 0)
+  Endif
+
+
+ EndByteCode
+ DefaultPort : comm3
+EndObject
+
+Object : SupStaticLoopCtl
+ Type : InfinityProgram
+ LastChange : 4/5/2018 2:04:00 PM
+ DeviceId : MtAuburnHospital\Proj6552.Ahu5
+ Alias : SupStaticLoopCtl
+ CreateTime : 4/5/2018 12:01:31 PM
+ CreatedBy : Root\Acc
+ TimeLocked : 4/6/2018 6:27:07 AM
+ InstanceId : 7050/7233
+ ByteCode : 
+Numeric loopGains[12]
+Datetime lasttime
+
+Init:
+
+  loopGains[1] = 0.05
+  loopGains[2] = 0.005
+  loopGains[3] = loopGains[2] / 4
+  loopGains[10] = 5
+
+  Goto Shutdown
+
+Shutdown:
+
+  If FanStatus then Goto PIDSetup
+  SupStaticLoop = 0
+
+PIDSetup:
+
+  loopGains[11] = SupStaticLoop
+  PIDLoop10(0, SupStatic, SupStaticSpt, loopGains, lasttime, 0)
+
+  Goto Modulating
+
+Modulating:
+
+  If TD > 0 then Goto Init
+  If not FanStatus then Goto Shutdown
+
+  If abs(Date - lasttime) >= loopGains[10] then
+    SupStaticLoop = PIDLoop10(2, SupStatic, SupStaticSpt, loopGains, lasttime, 0)
+  Endif
+
+
+ EndByteCode
+ DefaultPort : comm3
+EndObject
+
+Object : SupFansStgCtl
+ Type : InfinityProgram
+ LastChange : 4/5/2018 12:01:22 PM
+ DeviceId : MtAuburnHospital\Proj6552.Ahu5
+ Alias : SupFansStgCtl
+ CreateTime : 4/5/2018 12:01:22 PM
+ CreatedBy : Root\Acc
+ TimeLocked : 4/6/2018 6:42:02 AM
+ InstanceId : 7050/7232
+ ByteCode : 
+
+
+
+Shutdown:
+
+  If Occupied and (not ShutdownAlm) and (not SystemDisable) then Goto RunFans
+  SupFanSStg = 0
+
+RunFans:
+
+  If (not Occupied) or ShutdownAlm or SystemDisable then Goto Shutdown
+  SupFanSStg = 100%
+ EndByteCode
+ DefaultPort : comm3
+EndObject
+
+Object : SupSmkDampersCtl
+ Type : InfinityProgram
+ LastChange : 4/5/2018 12:01:12 PM
+ DeviceId : MtAuburnHospital\Proj6552.Ahu5
+ Alias : SupSmkDampersCtl
+ CreateTime : 4/5/2018 12:01:12 PM
+ CreatedBy : Root\Acc
+ TimeLocked : 4/6/2018 6:42:01 AM
+ InstanceId : 7050/7231
+ ByteCode : 
+
+DamperClose:
+
+  If not SmokeAlm then Goto DamperOpen
+  SupSmkDampers = Off
+
+DamperOpen:
+
+  If SmokeAlm then Goto DamperClose
+  SupSmkDampers = On
+ EndByteCode
+ DefaultPort : comm3
+EndObject
+
+Object : SupFansEcmCtl
+ Type : InfinityProgram
+ LastChange : 4/5/2018 12:19:39 PM
+ DeviceId : MtAuburnHospital\Proj6552.Ahu5
+ Alias : SupFansEcmCtl
+ CreateTime : 4/5/2018 12:00:52 PM
+ CreatedBy : Root\Acc
+ TimeLocked : 4/6/2018 6:42:03 AM
+ InstanceId : 7050/7230
+ ByteCode : 
+Numeric rate
+Numeric SupFanEcm
+
+Init:
+
+  rate = 100% / 120
+  Goto Shutdown
+
+Shutdown:
+
+  If SupFanStg > 0 then Goto Startup
+  SupFan1.2Ecm = 0
+  SupFan3.4Ecm = 0
+  SupFan5.6Ecm = 0
+  SupFan7.8Ecm = 0
+
+Startup:
+
+  If SupFanStg < 1 then Goto Shutdown
+  If FanStatus and SupSDEsOpen then Goto Rampup
+
+  SupFan1.2Ecm = SupFanEcmMin
+  SupFan3.4Ecm = SupFanEcmMin
+  SupFan5.6Ecm = SupFanEcmMin
+  SupFan7.8Ecm = SupFanEcmMin
+
+Rampup:
+
+  If SupFanStg < 1 then Goto Shutdown
+  If SupSDEsOpen then Goto Startup
+  If SupFanEcm >= SupStaticLoop then Goto Tracking
+
+  SupFanEcm = minimum(100%, maximum(SupFanEcmMin, SupFanEcm + rate * Scan))
+
+  SupFan1.2Ecm = SupFanEcm
+  SupFan3.4Ecm = SupFanEcm
+  SupFan5.6Ecm = SupFanEcm
+  SupFan7.8Ecm = SupFanEcm
+
+Tracking:
+
+  If SupFanStg < 1 then Goto Shutdown
+  If SupSDEsOpen then Goto Startup
+
+  SupFanEcm = maximum(SupFanEcmMin, SupStaticLoop)
+
+  SupFan1.2Ecm = SupFanEcm
+  SupFan3.4Ecm = SupFanEcm
+  SupFan5.6Ecm = SupFanEcm
+  SupFan7.8Ecm = SupFanEcm
+
+
+ EndByteCode
+ DefaultPort : comm3
+EndObject
+
+Object : StmValveCtl
+ Type : InfinityProgram
+ LastChange : 4/5/2018 12:00:12 PM
+ DeviceId : MtAuburnHospital\Proj6552.Ahu5
+ Alias : StmValveCtl
+ CreateTime : 4/5/2018 12:00:12 PM
+ CreatedBy : Root\Acc
+ TimeLocked : 4/6/2018 6:42:05 AM
+ InstanceId : 7050/7229
+ ByteCode : 
+Shutdown:
+
+  If SupTempLoopEn then Goto Modulating
+
+  StmValve1 = 0
+  StmValve2 = 0
+
+Modulating:
+
+  If not (SupTempLoopEn) then Goto Shutdown
+
+  StmValve1 = LinearReset4(0%, 33%, 0%, 100%, SupTempLoop)
+  StmValve2 = LinearReset4(33%, 100%, 0%, 100%, SupTempLoop)
+
+ EndByteCode
+ DefaultPort : comm3
+EndObject
+
+Object : RetStaticLoopCtl
+ Type : InfinityProgram
+ LastChange : 4/5/2018 2:03:49 PM
+ DeviceId : MtAuburnHospital\Proj6552.Ahu5
+ Alias : RetStaticLoopCtl
+ CreateTime : 4/5/2018 11:59:34 AM
+ CreatedBy : Root\Acc
+ TimeLocked : 4/6/2018 6:42:06 AM
+ InstanceId : 7050/7228
+ ByteCode : 
+Numeric loopGains[12]
+Datetime lasttime
+
+Init:
+
+  loopGains[1] = 0.05
+  loopGains[2] = 0.005
+  loopGains[3] = loopGains[2] / 4
+  loopGains[10] = 5
+
+  Goto Shutdown
+
+Shutdown:
+
+  If FanStatus then Goto PIDSetup
+  RetStaticLoop = 0
+
+PIDSetup:
+
+  loopGains[11] = RetStaticLoop
+  PIDLoop10(0, RetStatic, RetStaticSpt, loopGains, lasttime, 0)
+
+  Goto Modulating
+
+Modulating:
+
+  If TD > 0 then Goto Init
+  If not FanStatus then Goto Shutdown
+
+  If abs(Date - lasttime) >= loopGains[10] then
+    RetStaticLoop = PIDLoop10(2, RetStatic, RetStaticSpt, loopGains, lasttime, 0)
+  Endif
+
+
+ EndByteCode
+ DefaultPort : comm3
+EndObject
+
+Object : RetFanStgCtl
+ Type : InfinityProgram
+ LastChange : 4/5/2018 11:57:54 AM
+ DeviceId : MtAuburnHospital\Proj6552.Ahu5
+ Alias : RetFanStgCtl
+ CreateTime : 4/5/2018 11:57:54 AM
+ CreatedBy : Root\Acc
+ TimeLocked : 4/6/2018 6:42:13 AM
+ InstanceId : 7050/7226
+ ByteCode : 
+
+
+
+Shutdown:
+
+  If Occupied and not SystemDisable then Goto RunFans
+  RetFanStg = 0
+
+RunFans:
+
+  If not Occupied or SystemDisable then Goto Shutdown
+  RetFanStg = 100%
+ EndByteCode
+ DefaultPort : comm3
+EndObject
+
+Object : RetSmkDampersCtl
+ Type : InfinityProgram
+ LastChange : 4/5/2018 12:04:39 PM
+ DeviceId : MtAuburnHospital\Proj6552.Ahu5
+ Alias : RetSmkDampersCtl
+ CreateTime : 4/5/2018 11:57:09 AM
+ CreatedBy : Root\Acc
+ TimeLocked : 4/6/2018 6:42:12 AM
+ InstanceId : 7050/7225
+ ByteCode : 
+
+DamperClose:
+
+  If not SmokeAlm then Goto DamperOpen
+  RetSmkDampers = Off
+
+DamperOpen:
+
+  If SmokeAlm then Goto DamperClose
+  RetSmkDampers = On
+ EndByteCode
+ DefaultPort : comm3
+EndObject
+
+Object : MixTempLoopCtl
+ Type : InfinityProgram
+ LastChange : 4/6/2018 6:41:42 AM
+ DeviceId : MtAuburnHospital\Proj6552.Ahu5
+ Alias : MixTempLoopCtl
+ CreateTime : 4/5/2018 11:56:16 AM
+ CreatedBy : Root\Acc
+ TimeLocked : 4/6/2018 6:41:42 AM
+ InstanceId : 7050/7224
+ ByteCode : 
+Numeric loopGains[12]
+Datetime lasttime
+
+Init:
+
+  loopGains[1] = 0.02
+  loopGains[2] = 0.001
+  loopGains[3] = loopGains[2] / 4
+  loopGains[10] = 5
+
+  Goto Shutdown
+
+Shutdown:
+
+  If MixTempLoopEn then Goto PIDSetup
+  MixTempLoop = 0
+
+PIDSetup:
+
+  loopGains[11] = MixTempLoop
+  PIDLoop10(0, MixTemp, MixTempSpt, loopGains, lasttime, 0)
+
+  Goto Modulating
+
+Modulating:
+
+  If TD > 0 then Goto Init
+  If not MixTempLoopEn then Goto Shutdown
+  If CCTempLoop > 4% and MixTempLoop = 100% then Goto Holding
+
+  If abs(Date - lasttime) >= loopGains[10] then
+    MixTempLoop = PIDLoop10(1, MixTemp, MixTempSpt, loopGains, lasttime, 0)
+  Endif
+
+Holding:
+
+  If not MixTempLoopEn then Goto Shutdown
+  If CCTempLoop < 2% then Goto PIDSetup
+
+  MixTempLoop = 100%
+ EndByteCode
+ DefaultPort : comm3
+EndObject
+
+Object : MixTempLLLoopCtl
+ Type : InfinityProgram
+ LastChange : 4/6/2018 6:41:55 AM
+ DeviceId : MtAuburnHospital\Proj6552.Ahu5
+ Alias : MixTempLLLoopCtl
+ CreateTime : 4/5/2018 11:55:59 AM
+ CreatedBy : Root\Acc
+ TimeLocked : 4/6/2018 6:41:55 AM
+ InstanceId : 7050/7223
+ ByteCode : 
+Numeric loopGains[12]
+Numeric llspt
+Datetime lasttime
+
+Init:
+
+  loopGains[1] = 0.02
+  loopGains[2] = 0.001
+  loopGains[3] = loopGains[2] / 4
+  loopGains[10] = 5
+
+  llspt = 40
+
+  Goto Shutdown
+
+Shutdown:
+
+  If FanStatus then Goto PIDSetup
+  MixTempLLLoop = 100%
+
+PIDSetup:
+
+  loopGains[11] = MixTempLLLoop
+  PIDLoop10(0, MixTemp, llspt, loopGains, lasttime, 0)
+
+  Goto Modulating
+
+Modulating:
+
+  If TD > 0 then Goto Init
+  If not FanStatus then Goto Shutdown
+
+  If abs(Date - lasttime) >= loopGains[10] then
+    MixTempLLLoop = PIDLoop10(1, MixTemp, llspt, loopGains, lasttime, 0)
+  Endif
+
+
+ EndByteCode
+ DefaultPort : comm3
+EndObject
+
+Object : HumidValveCtl
+ Type : InfinityProgram
+ LastChange : 4/5/2018 11:53:11 AM
+ DeviceId : MtAuburnHospital\Proj6552.Ahu5
+ Alias : HumidValveCtl
+ CreateTime : 4/5/2018 11:53:11 AM
+ CreatedBy : Root\Acc
+ TimeLocked : 4/6/2018 6:42:38 AM
+ InstanceId : 7050/7222
+ ByteCode : 
+Shutdown:
+
+  If FanStatus and HumidEnable then Goto Modulating_Init
+  HumidValve = 0
+
+Modulating_Init:
+
+  If TS > 60 then Goto Modulating
+  If not (FanStatus and HumidEnable) then Goto Shutdown
+
+Modulating:
+
+  If not (FanStatus and HumidEnable) then Goto Shutdown
+  HumidValve = HumidLoop
+
+ EndByteCode
+ DefaultPort : comm3
+EndObject
+
+Object : HumidLoopCtl
+ Type : InfinityProgram
+ LastChange : 4/5/2018 11:52:19 AM
+ DeviceId : MtAuburnHospital\Proj6552.Ahu5
+ Alias : HumidLoopCtl
+ CreateTime : 4/5/2018 11:52:19 AM
+ CreatedBy : Root\Acc
+ TimeLocked : 4/6/2018 6:42:54 AM
+ InstanceId : 7050/7221
+ ByteCode : 
+Numeric loopGains[12]
+Datetime lasttime
+
+Init:
+
+  loopGains[1] = 0.02
+  loopGains[2] = 0.001
+  loopGains[3] = loopGains[2] / 4
+  loopGains[10] = 5
+
+  Goto Shutdown
+
+Shutdown:
+
+  If FanStatus and HumidEnable then Goto PIDSetup
+  HumidLoop = 0
+
+PIDSetup:
+
+  loopGains[11] = HumidLoop
+  PIDLoop10(0, SupDewpoint, HumidSpt, loopGains, lasttime, 0)
+
+  Goto Modulating
+
+Modulating:
+
+  If TD > 0 then Goto Init
+  If not (FanStatus and HumidEnable) then Goto PIDSetup
+
+  If abs(Date - lasttime) >= loopGains[10] then
+    HumidLoop = PIDLoop10(2, SupDewpoint, HumidSpt, loopGains, lasttime, 0)
+  Endif
+
+
+ EndByteCode
+ DefaultPort : comm3
+EndObject
+
+Object : ExhStaticLoopCtl
+ Type : InfinityProgram
+ LastChange : 4/6/2018 6:43:12 AM
+ DeviceId : MtAuburnHospital\Proj6552.Ahu5
+ Alias : ExhStaticLoopCtl
+ CreateTime : 4/5/2018 11:50:39 AM
+ CreatedBy : Root\Acc
+ TimeLocked : 4/6/2018 6:43:12 AM
+ InstanceId : 7050/7219
+ ByteCode : 
+Numeric loopGains[12]
+Datetime lasttime
+
+Init:
+
+  loopGains[1] = 0.05
+  loopGains[2] = 0.005
+  loopGains[3] = loopGains[2] / 4
+  loopGains[10] = 5
+
+  Goto Shutdown
+
+Shutdown:
+
+  If FanStatus then Goto PIDSetup
+  ExhStaticLoop = 0
+
+PIDSetup:
+
+  loopGains[11] = ExhStaticLoop
+  PIDLoop10(0, ExhStatic, ExhStaticSpt, loopGains, lasttime, 0)
+
+  Goto Modulating
+
+Modulating:
+
+  If TD > 0 then Goto Init
+  If not FanStatus then Goto Shutdown
+
+  If abs(Date - lasttime) >= loopGains[10] then
+    ExhStaticLoop = PIDLoop10(1, ExhStatic, ExhStaticSpt, loopGains, lasttime, 0)
+  Endif
+
+
+ EndByteCode
+ DefaultPort : comm3
+EndObject
+
+Object : ExhDamperCtl
+ Type : InfinityProgram
+ LastChange : 4/5/2018 11:50:05 AM
+ DeviceId : MtAuburnHospital\Proj6552.Ahu5
+ Alias : ExhDamperCtl
+ CreateTime : 4/5/2018 11:50:05 AM
+ CreatedBy : Root\Acc
+ TimeLocked : 4/6/2018 6:41:34 AM
+ InstanceId : 7050/7218
+ ByteCode : 
+FreezeProtect:
+
+  If not FreezeStatAlm then Goto Shutdown
+
+  ExhDamper = 0%
+
+Shutdown:
+
+  If FreezeStatAlm then Goto FreezeProtect
+  If FanStatus then Goto Modulating
+
+  ExhDamper = 0%
+
+Modulating:
+
+  If FreezeStatAlm then Goto FreezeProtect
+  If not FanStatus then Goto Shutdown
+
+  ExhDamper = ExhStaticLoop
+
+
+ EndByteCode
+ DefaultPort : comm3
+EndObject
+
+Object : DemandVentResetCtl
+ Type : InfinityProgram
+ LastChange : 4/6/2018 6:34:54 AM
+ DeviceId : MtAuburnHospital\Proj6552.Ahu5
+ Alias : DemandVentResetC
+ CreateTime : 4/5/2018 11:48:59 AM
+ CreatedBy : Root\Acc
+ TimeLocked : 4/6/2018 6:34:54 AM
+ InstanceId : 7050/7217
+ ByteCode : 
+Numeric loopGains[12]
+Datetime lasttime
+
+Init:
+
+  loopGains[1] = 0.01
+  loopGains[2] = 0.0001
+  loopGains[3] = loopGains[2] / 4
+  loopGains[10] = 5
+
+  Goto Shutdown
+
+Shutdown:
+
+  If (FanStatus and DemandVentEnable) then Goto PIDSetup
+  DemandVentReset = 0
+
+PIDSetup:
+
+  loopGains[11] = DemandVentReset
+  PIDLoop10(0, RetCO2, RetCO2Spt, loopGains, lasttime, 0)
+
+  Goto Modulating
+
+Modulating:
+
+  If TD > 0 then Goto Init
+  If not (FanStatus and DemandVentEnable) then Goto Shutdown
+
+  If abs(Date - lasttime) >= loopGains[10] then
+    DemandVentReset = PIDLoop10(2, RetCO2, RetCO2Spt, loopGains, lasttime, 0)
+  Endif
+
+
+ EndByteCode
+ DefaultPort : comm3
+EndObject
+
+Object : DehumidLoopCtl
+ Type : InfinityProgram
+ LastChange : 4/6/2018 6:43:32 AM
+ DeviceId : MtAuburnHospital\Proj6552.Ahu5
+ Alias : DehumidLoopCtl
+ CreateTime : 4/5/2018 11:48:47 AM
+ CreatedBy : Root\Acc
+ TimeLocked : 4/6/2018 6:43:32 AM
+ InstanceId : 7050/7216
+ ByteCode : 
+Numeric loopGains[12]
+Datetime lasttime
+
+Init:
+
+  loopGains[1] = 0.02
+  loopGains[2] = 0.001
+  loopGains[3] = loopGains[2] / 4
+  loopGains[10] = 5
+
+  Goto Shutdown
+
+Shutdown:
+
+  If FanStatus and DehumidEnable then Goto PIDSetup
+  DehumidLoop = 0
+
+PIDSetup:
+
+  loopGains[11] = DehumidLoop
+  PIDLoop10(0, SupDewpoint, DehumidSpt, loopGains, lasttime, 0)
+
+  Goto Modulating
+
+Modulating:
+
+  If TD > 0 then Goto Init
+  If not (FanStatus and DehumidEnable) then Goto Shutdown
+
+  If abs(Date - lasttime) >= loopGains[10] then
+    DehumidLoop = PIDLoop10(1, SupDewpoint, DehumidSpt, loopGains, lasttime, 0)
+  Endif
+
+
+ EndByteCode
+ DefaultPort : comm3
+EndObject
+
+Object : DamperCtl
+ Type : InfinityProgram
+ LastChange : 4/5/2018 11:48:35 AM
+ DeviceId : MtAuburnHospital\Proj6552.Ahu5
+ Alias : DamperCtl
+ CreateTime : 4/5/2018 11:48:35 AM
+ CreatedBy : Root\Acc
+ TimeLocked : 4/6/2018 6:43:27 AM
+ InstanceId : 7050/7215
+ ByteCode : 
+Numeric damper
+
+FreezeProtect:
+
+  If not FreezeStatAlm then Goto Shutdown
+
+  OaDamper1 = 0%
+  OaDamper2 = 0%
+  RetDamper = 100%
+
+Shutdown:
+
+  If FreezeStatAlm then Goto FreezeProtect
+  If FanStatus then Goto Modulating
+
+  OaDamper1 = 0%
+  OaDamper2 = 0%
+  RetDamper = 100%
+
+Modulating:
+
+  If FreezeStatAlm then Goto FreezeProtect
+  If not FanStatus then Goto Shutdown
+
+  damper = minimum(MixTempLLLoop, maximum(MixTempLoop, DemandVentReset))
+
+  OaDamper1 = LinearReset4(0%, 50%, 0%, 100%, damper)
+  OaDamper2 = LinearReset4(50%, 100%, 0%, 100%, damper)
+  RetDamper = LinearReset4(0%, 100%, 100%, 0%, damper)
+
+
+ EndByteCode
+ DefaultPort : comm3
+EndObject
+
+Object : ChwValveCtl
+ Type : InfinityProgram
+ LastChange : 4/5/2018 11:47:18 AM
+ DeviceId : MtAuburnHospital\Proj6552.Ahu5
+ Alias : ChwValveCtl
+ CreateTime : 4/5/2018 11:47:18 AM
+ CreatedBy : Root\Acc
+ TimeLocked : 4/6/2018 6:43:34 AM
+ InstanceId : 7050/7214
+ ByteCode : 
+Shutdown:
+
+  If CCTempLoopEn or DehumidEnable then Goto Modulating
+
+  ChwValve = 0
+
+Modulating:
+
+  If not (CCTempLoopEn or DehumidEnable) then Goto Shutdown
+
+  ChwValve = maximum(CCTempLoop, DehumidLoop)
+
+ EndByteCode
+ DefaultPort : comm3
+EndObject
+
+Object : CCTempLoopCtl
+ Type : InfinityProgram
+ LastChange : 4/6/2018 6:41:32 AM
+ DeviceId : MtAuburnHospital\Proj6552.Ahu5
+ Alias : CCTempLoopCtl
+ CreateTime : 4/5/2018 11:46:46 AM
+ CreatedBy : Root\Acc
+ TimeLocked : 4/6/2018 6:41:32 AM
+ InstanceId : 7050/7213
+ ByteCode : 
+Numeric loopGains[12]
+Datetime lasttime
+
+Init:
+
+  loopGains[1] = 0.02
+  loopGains[2] = 0.001
+  loopGains[3] = loopGains[2] / 4
+  loopGains[10] = 5
+
+  Goto Shutdown
+
+Shutdown:
+
+  If CCTempLoopEn then Goto PIDSetup
+  CCTempLoop = 0
+
+PIDSetup:
+
+  loopGains[11] = CCTempLoop
+  PIDLoop10(0, CCTemp, CCTempSpt, loopGains, lasttime, 0)
+
+  Goto Modulating
+
+Modulating:
+
+  If TD > 0 then Goto Init
+  If not CCTempLoopEn then Goto Shutdown
+
+  If abs(Date - lasttime) >= loopGains[10] then
+    CCTempLoop = PIDLoop10(1, CCTemp, CCTempSpt, loopGains, lasttime, 0)
+  Endif
+
+
+ EndByteCode
+ DefaultPort : comm3
+EndObject
+
+Object : MiscVariable
+ Type : InfinityProgram
+ LastChange : 4/5/2018 3:14:49 PM
+ DeviceId : MtAuburnHospital\Proj6552.Ahu5
+ Alias : MiscVariable
+ CreateTime : 4/5/2018 11:43:39 AM
+ CreatedBy : Root\Acc
+ TimeLocked : 4/6/2018 6:42:35 AM
+ InstanceId : 7050/7212
+ ByteCode : 
+
+Numeric lvTM
+Numeric MixTemps[5]
+Numeric CCTemps[5]
+Numeric supDampers
+Numeric retDampers
+
+OnlyLine:
+
+  If lvTM <> TM then
+
+    If SupFan1Status then SupFan1RT = SupFan1RT + 1 / 60
+    If SupFan2Status then SupFan2RT = SupFan2RT + 1 / 60
+    If SupFan3Status then SupFan3RT = SupFan3RT + 1 / 60
+    If SupFan4Status then SupFan4RT = SupFan4RT + 1 / 60
+    If SupFan5Status then SupFan5RT = SupFan5RT + 1 / 60
+    If SupFan6Status then SupFan6RT = SupFan6RT + 1 / 60
+    If SupFan7Status then SupFan7RT = SupFan7RT + 1 / 60
+    If SupFan8Status then SupFan8RT = SupFan8RT + 1 / 60
+
+    If RetFan1Status then RetFan1RT = RetFan1RT + 1 / 60
+    If RetFan2Status then RetFan2RT = RetFan2RT + 1 / 60
+    If RetFan3Status then RetFan3RT = RetFan3RT + 1 / 60
+    If RetFan4Status then RetFan4RT = RetFan4RT + 1 / 60
+    If RetFan5Status then RetFan5RT = RetFan5RT + 1 / 60
+
+  Endif
+
+  SupFan1SS = SupFanSStg > 1
+  SupFan2SS = SupFanSStg > 2
+  SupFan3SS = SupFanSStg > 3
+  SupFan4SS = SupFanSStg > 4
+  SupFan5SS = SupFanSStg > 5
+  SupFan6SS = SupFanSStg > 6
+  SupFan7SS = SupFanSStg > 7
+  SupFan8SS = SupFanSStg > 8
+
+  RetFan1SS = RetFanSStg > 1
+  RetFan2SS = RetFanSStg > 2
+  RetFan3SS = RetFanSStg > 3
+  RetFan4SS = RetFanSStg > 4
+  RetFan5SS = RetFanSStg > 5
+
+  SupFans = SupFan1Status + SupFan2Status + SupFan3Status + SupFan4Status + SupFan5Status + SupFan6Status + SupFan7Status + SupFan8Status
+  If SupFans > 0 then SupFanStatus = On Else SupFanStatus = Off
+
+  RetFans = RetFan1Status + RetFan2Status + RetFan3Status + RetFan4Status + RetFan5Status
+  If RetFans > 0 then RetFanStatus = On Else RetFanStatus = Off
+
+  SupSDEsOpen = SupSD1ESOpen or SupSD2ESOpen
+  RetSDEsOpen = RetSD1ESOpen or RetSD2ESOpen
+  SupSDEsClose = SupSD1ESClose or SupSD2ESClose
+  RetSDEsClose = RetSD1ESClose or RetSD2ESClose
+
+  SupFanAlms = SupFan1Alm + SupFan2Alm + SupFan3Alm + SupFan4Alm + SupFan5Alm + SupFan6Alm + SupFan7Alm + SupFan8Alm
+  SupFanAlm = SupFanAlms > 0
+
+  RetFanAlms = RetFan1Alm + RetFan2Alm + RetFan3Alm + RetFan4Alm + RetFan5Alm
+  RetFanAlm = RetFanAlms > 0
+
+  SmokeAlm = SupSmokeAlm or RetSmoke1Alm or RetSmoke2Alm
+  PressAlm = SupFanHiPressAlm or SupFanLoPressAlm or RetFanHiPressAlm or RetFanLoPressAlm
+  ShutdownAlm = SmokeAlm or PressAlm or FreezeStatAlm
+
+  MixTemps[1] = MixTemp1
+  MixTemps[2] = MixTemp2
+  MixTemps[3] = MixTemp3
+  MixTemps[4] = MixTemp4
+  MixTemps[5] = MixTemp5
+
+  MixTemp = average(MixTemp)
+  MixTempLo = minimum(MixTemp)
+
+  CCTemps[1] = CCTemp1
+  CCTemps[2] = CCTemp2
+  CCTemps[3] = CCTemp3
+
+  CCTemp = average(CCTemp)
+  CCTempLo = minimum(CCTemp)
+
+  supDampers = (1 * SupSD1ESOpen + 2 * SupSD2ESOpen)
+  If supDampers = 0 then SupStatic = SupStatic1
+  If supDampers = 1 then SupStatic = SupStatic2
+  If supDampers = 2 then SupStatic = SupStatic3
+  If supDampers = 3 then SupStatic = (SupStatic2 + SupStatic3) / 2
+
+  retDampers = (1 * RetSD1ESOpen + 2 * RetSD2ESOpen)
+  If retDampers = 0 then RetStatic = 0
+  If retDampers = 1 then RetStatic = RetStatic1
+  If retDampers = 2 then RetStatic = RetStatic2
+  If retDampers = 3 then RetStatic = (RetStatic1 + RetStatic2) / 2
+
+  RetDewpoint = DewpointCalc3(RetTemp, RetRH, RetDewpoint)
+  SupDewpoint = DewpointCalc3(SupTemp, SupRH, SupDewpoint)
+  SupDewpointHL = DewpointCalc3(SupTemp, SupRHHL, SupDewpointHL)
+
+  RetDewpointSptLo = DewpointCalc3(72, RetHumidSpt, RetDewpointSptLo)
+  RetDewpointSptHi = DewpointCalc3(72, RetDehumidSpt, RetDewpointSptHi)
+
+  If RetRH < RetHumidSpt - 2 then HumidEnable = On
+  If RetRH > RetHumidSpt + 2 then HumidEnable = Off
+
+  If RetRH > RetDehumidSpt + 2 then DehumidEnable = On
+  If RetRH < RetDehumidSpt - 2 then DehumidEnable = Off
+
+  If OutsideTemp < EconomizerSpt - 1 and OutsideEnth < RetEnthalpy - 0.5 then Economizer = On
+  If OutsideTemp > EconomizerSpt + 1 then Economizer = Off
+  If OutsideEnth > RetEnthalpy + 0.5 then Economizer = Off
+
+  SupTempLoopEn = FanStatus and CCTempLoop < 1 and MixTempLoop < 1
+  CCTempLoopEn = FanStatus and SupTempLoop < 1 and (not Economizer or MixTempLoop < 1)
+  MixTempLoopEn = FanStatus and SupTempLoop < 1 and Economizer
+
+  SupTempSpt = LinearReset4(SupTempReset1Oa, SupTempReset2Oa, SupTempReset1, SupTempReset2, OutsideTemp)
+
+
+  lvTM = TM
+ EndByteCode
+ DefaultPort : comm3
+EndObject
+

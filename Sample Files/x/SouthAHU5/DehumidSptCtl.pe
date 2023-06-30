@@ -1,0 +1,43 @@
+Numeric tsUP
+Numeric tsDN
+
+Shutdown:
+
+  If FanStatus and DehumidEnable then Goto Init
+
+  DehumidSpt = RetDewpointSptHi
+
+Init:
+
+  DehumidSpt = (RetDewpointSptHi + RetDewpointSptLo) / 2
+
+  Goto Decide
+
+Decide:
+
+  If not (FanStatus and DehumidEnable) then Goto Shutdown
+
+  If RetDewpoint > RetDewpointSptHi + 0.5 then tsDN = tsDN + Scan Else tsDN = 0
+  If RetDewpoint < RetDewpointSptHi - 0.5 then tsUP = tsUP + Scan Else tsUP = 0
+
+  If tsDN > 300 then Goto ResetDN
+  If tsUP > 300 then Goto ResetUP
+
+ResetUP:
+
+  DehumidSpt = minimum(DehumidSpt + 0.5, SupDewpointHL, SupTempSpt + 2)
+  tsUP = 0
+
+  Goto Decide
+
+ResetDN:
+
+  DehumidSpt = maximum(DehumidSpt - 0.5, RetDewpointSptLo, 48)
+  tsDN = 0
+
+  Goto Decide
+
+
+
+
+

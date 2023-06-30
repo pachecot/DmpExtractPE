@@ -1,0 +1,12 @@
+
+
+
+Shutdown:
+
+  If Occupied and not SystemDisable then Goto RunFans
+  RetFanStg = 0
+
+RunFans:
+
+  If not Occupied or SystemDisable then Goto Shutdown
+  RetFanStg = 100%

@@ -1,0 +1,39 @@
+Numeric loopGains[12]
+Datetime lasttime
+
+Init:
+
+  loopGains[1] = 0.05
+  loopGains[2] = 0.005
+  loopGains[3] = loopGains[2] / 4
+  loopGains[10] = 5
+
+  Goto Shutdown
+
+Shutdown:
+
+  If FanStatus then Goto PIDSetup
+
+  Flr5BldgPressOut = 0
+
+PIDSetup:
+
+  loopGains[11] = Flr5BldgPressOut
+  PIDLoop10(0, Floor5_BldgPress + 10, Flr5BldgPressSpt + 10, loopGains, lasttime, 0)
+
+  Goto Modulating
+
+Modulating:
+
+  If TD > 0 then Goto Init
+  If not FanStatus then Goto Shutdown
+
+  If abs(Date - lasttime) >= loopGains[10] then
+    Flr5BldgPressOut = PIDLoop10(1, Floor5_BldgPress + 10, Flr5BldgPressSpt + 10, loopGains, lasttime, 0)
+  Endif
+
+
+
+
+
+

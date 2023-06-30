@@ -1,0 +1,15 @@
+Shutdown:
+
+  If FanStatus and HumidEnable then Goto Modulating_Init
+  HumidValve = 0
+
+Modulating_Init:
+
+  If TS > 60 then Goto Modulating
+  If not (FanStatus and HumidEnable) then Goto Shutdown
+
+Modulating:
+
+  If not (FanStatus and HumidEnable) then Goto Shutdown
+  HumidValve = HumidLoop
+

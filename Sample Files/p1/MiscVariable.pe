@@ -1,0 +1,117 @@
+
+Numeric lvTM
+Numeric MixTemps[5]
+Numeric CCTemps[5]
+Numeric supDampers
+Numeric retDampers
+
+OnlyLine:
+
+  If lvTM <> TM then
+
+    If SupFan1Status then SupFan1RT = SupFan1RT + 1 / 60
+    If SupFan2Status then SupFan2RT = SupFan2RT + 1 / 60
+    If SupFan3Status then SupFan3RT = SupFan3RT + 1 / 60
+    If SupFan4Status then SupFan4RT = SupFan4RT + 1 / 60
+    If SupFan5Status then SupFan5RT = SupFan5RT + 1 / 60
+    If SupFan6Status then SupFan6RT = SupFan6RT + 1 / 60
+    If SupFan7Status then SupFan7RT = SupFan7RT + 1 / 60
+    If SupFan8Status then SupFan8RT = SupFan8RT + 1 / 60
+
+    If RetFan1Status then RetFan1RT = RetFan1RT + 1 / 60
+    If RetFan2Status then RetFan2RT = RetFan2RT + 1 / 60
+    If RetFan3Status then RetFan3RT = RetFan3RT + 1 / 60
+    If RetFan4Status then RetFan4RT = RetFan4RT + 1 / 60
+    If RetFan5Status then RetFan5RT = RetFan5RT + 1 / 60
+
+  Endif
+
+  SupFan1SS = SupFanSStg > 1
+  SupFan2SS = SupFanSStg > 2
+  SupFan3SS = SupFanSStg > 3
+  SupFan4SS = SupFanSStg > 4
+  SupFan5SS = SupFanSStg > 5
+  SupFan6SS = SupFanSStg > 6
+  SupFan7SS = SupFanSStg > 7
+  SupFan8SS = SupFanSStg > 8
+
+  RetFan1SS = RetFanSStg > 1
+  RetFan2SS = RetFanSStg > 2
+  RetFan3SS = RetFanSStg > 3
+  RetFan4SS = RetFanSStg > 4
+  RetFan5SS = RetFanSStg > 5
+
+  SupFans = SupFan1Status + SupFan2Status + SupFan3Status + SupFan4Status + SupFan5Status + SupFan6Status + SupFan7Status + SupFan8Status
+  If SupFans > 0 then SupFanStatus = On Else SupFanStatus = Off
+
+  RetFans = RetFan1Status + RetFan2Status + RetFan3Status + RetFan4Status + RetFan5Status
+  If RetFans > 0 then RetFanStatus = On Else RetFanStatus = Off
+
+  SupSDEsOpen = SupSD1ESOpen or SupSD2ESOpen
+  RetSDEsOpen = RetSD1ESOpen or RetSD2ESOpen
+  SupSDEsClose = SupSD1ESClose or SupSD2ESClose
+  RetSDEsClose = RetSD1ESClose or RetSD2ESClose
+
+  SupFanAlms = SupFan1Alm + SupFan2Alm + SupFan3Alm + SupFan4Alm + SupFan5Alm + SupFan6Alm + SupFan7Alm + SupFan8Alm
+  SupFanAlm = SupFanAlms > 0
+
+  RetFanAlms = RetFan1Alm + RetFan2Alm + RetFan3Alm + RetFan4Alm + RetFan5Alm
+  RetFanAlm = RetFanAlms > 0
+
+  SmokeAlm = SupSmokeAlm or RetSmoke1Alm or RetSmoke2Alm
+  PressAlm = SupFanHiPressAlm or SupFanLoPressAlm or RetFanHiPressAlm or RetFanLoPressAlm
+  ShutdownAlm = SmokeAlm or PressAlm or FreezeStatAlm
+
+  MixTemps[1] = MixTemp1
+  MixTemps[2] = MixTemp2
+  MixTemps[3] = MixTemp3
+  MixTemps[4] = MixTemp4
+  MixTemps[5] = MixTemp5
+
+  MixTemp = average(MixTemp)
+  MixTempLo = minimum(MixTemp)
+
+  CCTemps[1] = CCTemp1
+  CCTemps[2] = CCTemp2
+  CCTemps[3] = CCTemp3
+
+  CCTemp = average(CCTemp)
+  CCTempLo = minimum(CCTemp)
+
+  supDampers = (1 * SupSD1ESOpen + 2 * SupSD2ESOpen)
+  If supDampers = 0 then SupStatic = SupStatic1
+  If supDampers = 1 then SupStatic = SupStatic2
+  If supDampers = 2 then SupStatic = SupStatic3
+  If supDampers = 3 then SupStatic = (SupStatic2 + SupStatic3) / 2
+
+  retDampers = (1 * RetSD1ESOpen + 2 * RetSD2ESOpen)
+  If retDampers = 0 then RetStatic = 0
+  If retDampers = 1 then RetStatic = RetStatic1
+  If retDampers = 2 then RetStatic = RetStatic2
+  If retDampers = 3 then RetStatic = (RetStatic1 + RetStatic2) / 2
+
+  RetDewpoint = DewpointCalc3(RetTemp, RetRH, RetDewpoint)
+  SupDewpoint = DewpointCalc3(SupTemp, SupRH, SupDewpoint)
+  SupDewpointHL = DewpointCalc3(SupTemp, SupRHHL, SupDewpointHL)
+
+  RetDewpointSptLo = DewpointCalc3(72, RetHumidSpt, RetDewpointSptLo)
+  RetDewpointSptHi = DewpointCalc3(72, RetDehumidSpt, RetDewpointSptHi)
+
+  If RetRH < RetHumidSpt - 2 then HumidEnable = On
+  If RetRH > RetHumidSpt + 2 then HumidEnable = Off
+
+  If RetRH > RetDehumidSpt + 2 then DehumidEnable = On
+  If RetRH < RetDehumidSpt - 2 then DehumidEnable = Off
+
+  If OutsideTemp < EconomizerSpt - 1 and OutsideEnth < RetEnthalpy - 0.5 then Economizer = On
+  If OutsideTemp > EconomizerSpt + 1 then Economizer = Off
+  If OutsideEnth > RetEnthalpy + 0.5 then Economizer = Off
+
+  SupTempLoopEn = FanStatus and CCTempLoop < 1 and MixTempLoop < 1
+  CCTempLoopEn = FanStatus and SupTempLoop < 1 and (not Economizer or MixTempLoop < 1)
+  MixTempLoopEn = FanStatus and SupTempLoop < 1 and Economizer
+
+  SupTempSpt = LinearReset4(SupTempReset1Oa, SupTempReset2Oa, SupTempReset1, SupTempReset2, OutsideTemp)
+
+
+  lvTM = TM

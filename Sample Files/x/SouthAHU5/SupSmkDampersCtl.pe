@@ -1,0 +1,13 @@
+
+DamperClose:
+  If FACPForceStrt then Goto DamperOpen
+  If not SmokeAlm then Goto DamperOpen
+
+  SupSmkDampers = Off
+
+DamperOpen:
+  If not FACPForceStrt and SmokeAlm then Goto DamperClose
+
+  SupSmkDampers = On
+
+

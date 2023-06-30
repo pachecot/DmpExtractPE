@@ -1,0 +1,15 @@
+Shutdown:
+
+  If CCTempLoopEn or DehumidEnable then Goto Modulating
+
+  ChwValve = 0
+
+Modulating:
+
+  If not (CCTempLoopEn or DehumidEnable) then Goto Shutdown
+
+  ChwValve = maximum(CCTempLoop, DehumidLoop)
+
+
+
+

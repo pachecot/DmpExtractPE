@@ -1,0 +1,10 @@
+
+DamperClose:
+
+  If not SmokeAlm then Goto DamperOpen
+  SupSmkDampers = Off
+
+DamperOpen:
+
+  If SmokeAlm then Goto DamperClose
+  SupSmkDampers = On

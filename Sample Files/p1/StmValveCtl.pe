@@ -1,0 +1,14 @@
+Shutdown:
+
+  If SupTempLoopEn then Goto Modulating
+
+  StmValve1 = 0
+  StmValve2 = 0
+
+Modulating:
+
+  If not (SupTempLoopEn) then Goto Shutdown
+
+  StmValve1 = LinearReset4(0%, 33%, 0%, 100%, SupTempLoop)
+  StmValve2 = LinearReset4(33%, 100%, 0%, 100%, SupTempLoop)
+

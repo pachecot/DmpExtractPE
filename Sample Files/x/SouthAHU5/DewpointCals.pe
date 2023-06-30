@@ -1,0 +1,27 @@
+Numeric avgSupRH
+Numeric x, n
+Numeric histSupRH[5]
+
+Init:
+
+  n = 5
+  For x = 1 to n  
+    histSupRH[x] = SupRH
+  Next x
+
+  x = 1
+  Goto OnlyLine
+
+OnlyLine:
+
+  histSupRH[x] = SupRH
+
+  avgSupRH = average(histSupRH)
+  RetDewpoint = DewpointCalc3(RetTemp, RetRH, RetDewpoint)
+  SupDewpoint = DewpointCalc3(SupTemp, avgSupRH, SupDewpoint)
+  SupDewpointHL = DewpointCalc3(SupTemp, SupRHHL, SupDewpointHL)
+  RetDewpointSptLo = DewpointCalc3(72, RetHumidSpt, RetDewpointSptLo)
+  RetDewpointSptHi = DewpointCalc3(72, RetDehumidSpt, RetDewpointSptHi)
+
+
+  If x < n then x = x + 1 Else x = 1

@@ -1,0 +1,49 @@
+Numeric tsUP
+Numeric tsDN
+
+
+Init:
+
+  If FanStatus and HumidEnable then Goto Decide
+  Goto Init
+
+Shutdown:
+
+  If FanStatus and HumidEnable then Goto StartUp
+
+  HumidSpt = RetDewpointSptLo
+
+StartUp:
+
+  HumidSpt = (RetDewpointSptLo + SupDewpointHL) / 2
+  Goto Decide
+
+Decide:
+
+  If not (FanStatus and HumidEnable) then Goto Shutdown
+
+  If RetDewpoint > RetDewpointSptLo + 0.5 then tsDN = tsDN + Scan Else tsDN = 0
+  If RetDewpoint < RetDewpointSptLo - 0.5 then tsUP = tsUP + Scan Else tsUP = 0
+
+  If tsDN > 300 then Goto ResetDN
+  If tsUP > 300 then Goto ResetUP
+
+  HumidSpt = minimum(HumidSpt, SupDewpointHL)
+
+ResetUP:
+
+  HumidSpt = minimum(HumidSpt + 0.5, SupDewpointHL)
+  tsUP = 0
+
+  Goto Decide
+
+ResetDN:
+
+  HumidSpt = maximum(HumidSpt - 0.5, RetDewpointSptLo)
+  tsDN = 0
+
+  Goto Decide
+
+
+
+

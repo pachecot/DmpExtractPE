@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "DmpExtractPE": {
+      "commandName": "Project",
+      "commandLineArgs": "pgms.dmp  p1",
+      "workingDirectory": "D:\\projects\\DmpProgramExtract2\\Sample Files"
+    }
+  }
+}
