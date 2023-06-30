@@ -1,9 +1,0 @@
-
-
-OnlyLine:
-
-  OutsideTemp = MtAuburnHospi\SouthCX1\OutsideTemp
-  OutsideRH = MtAuburnHospi\SouthCX1\OutsideRH
-  OutsideEnthalpy = MtAuburnHospi\SouthCX1\OutsideEnthalpy
-
-  EmgShutdown = MtAuburnHospi\NeedhamCX1\EmgShutdown

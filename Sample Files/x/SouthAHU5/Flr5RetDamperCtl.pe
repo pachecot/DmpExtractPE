@@ -1,3 +1,0 @@
-OnlyLine:
-
-  Flr5RetDamperA and Flr5RetDamperB = maximum(Flr5RetDamperMin, Flr5BldgPressOut)
